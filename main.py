@@ -4,23 +4,15 @@ import time
 import config.userconfig as cfg
 
 wb = webull()
-# wb.get_mfa(wb_email)
-# print(wb.get_security(wb_email))
+# print(wb.get_mfa(cfg.wb_email))
+# print(wb.get_security(cfg.wb_email))
 BUY_PRICE = 4.35
-SELL_PRICE = 4.75
-UPDATE_INTERVAL = 25
+SELL_PRICE = 4.7
+UPDATE_INTERVAL = 30
 
-# encodedEmail = rsa.encrypt(wb_email.encode(),publicKey)
-# encodedPassword = rsa.encrypt(webull_pass.encode(),publicKey)
-# encodedToken = rsa.encrypt(TRADE_TOKEN.encode(),publicKey)
-#
-# decodedEmail = encodedEmail.decode('utf-8')
-#
-#
-# print("Encoded Email: " + decodedEmail + " Encoded Password: " + str(encodedPassword) + " encodedToken: " + str(encodedToken))
-# print("PrivateKey: " + str(privateKey) + " publicKey: " + str(publicKey))
 
-data = wb.login(cfg.wb_email, cfg.webull_pass, 'Python', '951306', '1001', cfg.ANSWER) # 6 digits MFA, Security Question ID, Question Answer.
+
+data = wb.login(cfg.wb_email, cfg.webull_pass, cfg.HOSTNAME, cfg.AUTH_CODE, '1001', cfg.ANSWER) # 6 digits MFA, Security Question ID, Question Answer.
 wb.get_trade_token(cfg.TRADE_TOKEN)
 
 print(data)
@@ -85,8 +77,14 @@ while 0 < 1:
             counter = 0 # RESET COUNTER
 
     except:
-        print("Broken: Continuing")
-        wb.logout()
-        time.sleep(3)
-        data = wb.login(cfg.wb_email, cfg.webull_pass, 'Python', '951306', '1001', '0112')  # 6 digits MFA, Security Question ID, Question Answer.
+        while True:
+            try:
+                print("Broken: Continuing")
+                wb.logout()
+                time.sleep(10)
+                data = wb.login(cfg.wb_email, cfg.webull_pass, cfg.HOSTNAME, cfg.AUTH_CODE, '1001', cfg.ANSWER)  # 6 digits MFA, Security Question ID, Question Answer.
+                time.sleep(1)
+                break
+            except:
+                continue
         continue
