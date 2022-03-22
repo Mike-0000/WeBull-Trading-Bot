@@ -9,6 +9,7 @@ wb = webull()
 BUY_PRICE = 4.375
 SELL_PRICE = 4.6
 UPDATE_INTERVAL = 30
+TICKER = 'ASTR'
 
 data = wb.login(cfg.wb_email, cfg.webull_pass, cfg.HOSTNAME, cfg.AUTH_CODE, '1001', cfg.ANSWER) # 6 digits MFA, Security Question ID, Question Answer.
 wb.get_trade_token(cfg.TRADE_TOKEN)
@@ -25,11 +26,11 @@ while 0 < 1:
         if current_time >= 4 and current_time < 21:     #    Is Market Open??
             positions1 = wb.get_positions()
             positions2 = positions1[0] # ASTR in 0th position
-            ASTR = wb.get_analysis("ASTR")
+            ASTR = wb.get_analysis(TICKER)
 
             price = ASTR['targetPrice']['current']  #  Get price from analysis
             position = positions2['position']
-            quote = wb.get_quote("ASTR")
+            quote = wb.get_quote(TICKER)
             askbidlist = quote['depth']
             asks = askbidlist['ntvAggAskList']
             bids = askbidlist['ntvAggBidList']
@@ -56,12 +57,12 @@ while 0 < 1:
 
             if ask <= BUY_PRICE and level == 2:     # BUYING
                 print("Bought: " + ask)
-                wb.place_order(stock='ASTR', price=ask, action='BUY', orderType='LMT', enforce='GTC', quant=position+10)
+                wb.place_order(stock=TICKER, price=ask, action='BUY', orderType='LMT', enforce='GTC', quant=position+10)
                 level = level - 1
 
             if bid >= SELL_PRICE and level == 1:    # SELLING
                 print("SOLD: " + bid)
-                wb.place_order(stock='ASTR', price=bid, action='SELL', orderType='LMT', enforce='GTC', quant=position/2)
+                wb.place_order(stock=TICKER, price=bid, action='SELL', orderType='LMT', enforce='GTC', quant=position/2)
                 level = level + 1
 
         else:
