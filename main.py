@@ -58,7 +58,7 @@ while 0 < 1:
 
             if ask <= BUY_PRICE and level == 2:     # BUYING
                 print("Bought: " + ask)
-                wb.place_order(stock='ASTR', price=ask, action='BUY', orderType='LMT', enforce='GTC', quant=position)
+                wb.place_order(stock='ASTR', price=ask, action='BUY', orderType='LMT', enforce='GTC', quant=position+10)
                 level = level - 1
 
             if bid >= SELL_PRICE and level == 1:    # SELLING
@@ -82,7 +82,7 @@ while 0 < 1:
                 print("Broken: Continuing")
                 wb.logout()
                 time.sleep(10)
-                data = wb.login(cfg.wb_email, cfg.webull_pass, cfg.HOSTNAME, cfg.AUTH_CODE, '1001', cfg.ANSWER)  # 6 digits MFA, Security Question ID, Question Answer.
+                print(wb.login(cfg.wb_email, cfg.webull_pass, cfg.HOSTNAME, cfg.AUTH_CODE, '1001', cfg.ANSWER))  # 6 digits MFA, Security Question ID, Question Answer.
                 time.sleep(1)
                 break
             except:
