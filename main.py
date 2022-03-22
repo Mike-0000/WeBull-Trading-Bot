@@ -6,12 +6,13 @@ import config.userconfig as cfg
 wb = webull()
 # print(wb.get_mfa(cfg.wb_email))
 # print(wb.get_security(cfg.wb_email))
-BUY_PRICE = 4.35
-SELL_PRICE = 4.65
-UPDATE_INTERVAL = 1
-TICKER = 'ASTR'
+ASTR_BUY = 4.35
+ASTR_SELL = 4.65
+UPDATE_INTERVAL = 3
+ASTR_symbol = 'ASTR'
 
-data = wb.login(cfg.wb_email, cfg.webull_pass, cfg.HOSTNAME, cfg.AUTH_CODE, '1001', cfg.ANSWER) # 6 digits MFA, Security Question ID, Question Answer.
+data = wb.login(cfg.wb_email, cfg.webull_pass, cfg.HOSTNAME, cfg.AUTH_CODE, '1001',
+                cfg.ANSWER)  # 6 digits MFA, Security Question ID, Question Answer.
 wb.get_trade_token(cfg.TRADE_TOKEN)
 
 print(data)
@@ -19,21 +20,26 @@ print(data)
 counter = 0
 ASTRLevel = 1
 
-def getPositions(num):
+
+def getPositions(ticker):
     positions1 = wb.get_positions()
-    positions2 = positions1[num]
-    return positions2['position']
+    for symbols in positions1:
+        if str(symbols['ticker']['symbol']) == ticker:
+            return float(symbols['position'])
+
 
 def getAnalysis(ticker):
     return wb.get_analysis(ticker)
+
 
 def getAsk(ticker):
     min1 = 99999
     asks = getBidsAsks(ticker, "ask")
     for price in asks:
-        if float(price["price"]) < min1:  # FIND MAX CURRENT BID
+        if float(price["price"]) < min1:  # FIND MIN CURRENT ASK
             min1 = float(price["price"])
     return float(min1)
+
 
 def getBid(ticker):
     max1 = 0
@@ -42,6 +48,7 @@ def getBid(ticker):
         if float(price["price"]) > max1:  # FIND MAX CURRENT BID
             max1 = float(price["price"])
     return float(max1)
+
 
 def getBidsAsks(ticker, mode):
     quote = wb.get_quote(ticker)
@@ -53,52 +60,68 @@ def getBidsAsks(ticker, mode):
     else:
         return asks
 
+
 def getPrice(ticker):
     stock = getAnalysis(ticker)
     return stock['targetPrice']['current']
+
+
+def placeOrder(ticker, num, ask, mode):
+    wb.place_order(stock=ticker, price=ask, action=mode, orderType='LMT', enforce='GTC',
+                   quant=num)
+    print(mode + ": " + str(num) + " for $" + str(ask))
 
 while 0 < 1:
     try:
         now = datetime.now()
         current_time = now.hour
-        if current_time >= 4 or current_time <= 4:     #    Is Market Open??
 
-            numOfASTR = getPositions(0)
+        if current_time >= 4 and current_time <= 21:  # Is Market Open??
 
-            price = getPrice(TICKER)  #  Get price from analysis
+            numOfASTR = getPositions(ASTR_symbol)
 
-            ask = getAsk(TICKER)
+            ASTRprice = getPrice(ASTR_symbol)  # Get price from analysis
 
-            bid = getBid(TICKER)
+            ASTRask = getAsk(ASTR_symbol)
+
+            ASTRbid = getBid(ASTR_symbol)
+
+            ###   ASTR LOGIC
 
             if counter % UPDATE_INTERVAL == 0:
-                print("Bid: " + str(bid) + " Ask: " + str(ask))
+                print("Bid: " + str(ASTRbid) + " Ask: " + str(ASTRask))
 
             if ASTRLevel == 2:
                 print("triggered")
                 time.sleep(100)
 
-            if ask <= BUY_PRICE and ASTRLevel == 2:     # BUYING
-                print("Bought: " + ask)
-                wb.place_order(stock=TICKER, price=ask, action='BUY', orderType='LMT', enforce='GTC', quant=numOfASTR+7)
+                ### BUYING ASTR
+
+            if ASTRask <= ASTR_BUY and ASTRLevel == 2:  # BUYING
+                placeOrder(ASTR_symbol, int(getPositions(ASTR_symbol)+7), ASTRask, "BUY")
                 ASTRLevel = ASTRLevel - 1
 
-            if bid >= SELL_PRICE and ASTRLevel == 1:    # SELLING
-                print("SOLD: " + bid)
-                wb.place_order(stock=TICKER, price=bid, action='SELL', orderType='LMT', enforce='GTC', quant=numOfASTR/2)
+                ### SELLING ASTR
+
+            if ASTRbid >= ASTR_SELL and ASTRLevel == 1:  # SELLING
+                print("SOLD: " + ASTRbid)
+                placeOrder(ASTR_symbol, int(getPositions(ASTR_symbol)/2), ASTRbid, "SELL")
                 ASTRLevel = ASTRLevel + 1
 
+        ###  Misc Logic
         else:
-            #print(current_time)
+            # print(current_time)
             time.sleep(180)
             print("Market Closed")
             counter = counter + 1
-            if counter % 8 == 6:
+            if counter % 8 == 0:
                 print(wb.refresh_login())
+
+
         time.sleep(1)
         counter = counter + 1
         if counter > 400:
-            print(wb.refresh_login()) # Login Refresh
+            print(wb.refresh_login())  # Login Refresh
             wb.get_trade_token(cfg.TRADE_TOKEN)
             counter = 0  # RESET COUNTER
 
