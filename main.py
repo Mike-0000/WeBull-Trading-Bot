@@ -6,11 +6,9 @@ import config.userconfig as cfg
 wb = webull()
 # print(wb.get_mfa(cfg.wb_email))
 # print(wb.get_security(cfg.wb_email))
-BUY_PRICE = 4.35
-SELL_PRICE = 4.7
+BUY_PRICE = 4.375
+SELL_PRICE = 4.6
 UPDATE_INTERVAL = 30
-
-
 
 data = wb.login(cfg.wb_email, cfg.webull_pass, cfg.HOSTNAME, cfg.AUTH_CODE, '1001', cfg.ANSWER) # 6 digits MFA, Security Question ID, Question Answer.
 wb.get_trade_token(cfg.TRADE_TOKEN)
@@ -68,7 +66,11 @@ while 0 < 1:
 
         else:
             #print(current_time)
-            time.sleep(60)
+            time.sleep(180)
+            print("Market Closed")
+            counter = counter + 1
+            if counter % 8 == 6:
+                print(wb.refresh_login())
         time.sleep(1)
         counter = counter + 1
         if counter > 400:
