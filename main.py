@@ -7,8 +7,8 @@ wb = webull()
 # print(wb.get_mfa(cfg.wb_email))
 # print(wb.get_security(cfg.wb_email))
 ASTR_BUY = 4.35
-ASTR_SELL = 4.65
-UPDATE_INTERVAL = 3
+ASTR_SELL = 4.62
+UPDATE_INTERVAL = 30
 ASTR_symbol = 'ASTR'
 
 data = wb.login(cfg.wb_email, cfg.webull_pass, cfg.HOSTNAME, cfg.AUTH_CODE, '1001', cfg.ANSWER)
@@ -105,19 +105,19 @@ while 0 < 1:
                 ### SELLING ASTR
 
             if ASTRbid >= ASTR_SELL and ASTRLevel == 1:  # SELLING
-                print("SOLD: " + ASTRbid)
                 placeOrder(ASTR_symbol, int(getPositions(ASTR_symbol)/2), ASTRbid, "SELL")
                 ASTRLevel = ASTRLevel + 1
 
-        ###  Misc Logic
+
         else:
             # print(current_time)
             time.sleep(180)
             print("Market Closed")
             counter = counter + 1
-            if counter % 8 == 0:
+            if counter % 2 == 0:
                 print(wb.refresh_login())
 
+        ###  Misc Logic
 
         time.sleep(1)
         counter = counter + 1
