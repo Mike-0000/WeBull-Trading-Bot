@@ -1,4 +1,4 @@
-from webull import webull # for paper trading, import 'paper_webull'
+from webull import webull  # for paper trading, import 'paper_webull'
 from datetime import datetime
 import time
 import config.userconfig as cfg
@@ -8,7 +8,7 @@ wb = webull()
 # print(wb.get_security(cfg.wb_email))
 BUY_PRICE = 4.35
 SELL_PRICE = 4.65
-UPDATE_INTERVAL = 30
+UPDATE_INTERVAL = 1
 TICKER = 'ASTR'
 
 data = wb.login(cfg.wb_email, cfg.webull_pass, cfg.HOSTNAME, cfg.AUTH_CODE, '1001', cfg.ANSWER) # 6 digits MFA, Security Question ID, Question Answer.
@@ -17,52 +17,76 @@ wb.get_trade_token(cfg.TRADE_TOKEN)
 print(data)
 
 counter = 0
-level = 1
+ASTRLevel = 1
+
+def getPositions(num):
+    positions1 = wb.get_positions()
+    positions2 = positions1[num]
+    return positions2['position']
+
+def getAnalysis(ticker):
+    return wb.get_analysis(ticker)
+
+def getAsk(ticker):
+    min1 = 99999
+    asks = getBidsAsks(ticker, "ask")
+    for price in asks:
+        if float(price["price"]) < min1:  # FIND MAX CURRENT BID
+            min1 = float(price["price"])
+    return float(min1)
+
+def getBid(ticker):
+    max1 = 0
+    bids = getBidsAsks(ticker, "bid")
+    for price in bids:
+        if float(price["price"]) > max1:  # FIND MAX CURRENT BID
+            max1 = float(price["price"])
+    return float(max1)
+
+def getBidsAsks(ticker, mode):
+    quote = wb.get_quote(ticker)
+    askbidlist = quote['depth']
+    asks = askbidlist['ntvAggAskList']
+    bids = askbidlist['ntvAggBidList']
+    if mode == 'bid':
+        return bids
+    else:
+        return asks
+
+def getPrice(ticker):
+    stock = getAnalysis(ticker)
+    return stock['targetPrice']['current']
+
 while 0 < 1:
     try:
-
         now = datetime.now()
         current_time = now.hour
-        if current_time >= 4 and current_time < 21:     #    Is Market Open??
-            positions1 = wb.get_positions()
-            positions2 = positions1[0] # ASTR in 0th position
-            ASTR = wb.get_analysis(TICKER)
+        if current_time >= 4 or current_time <= 4:     #    Is Market Open??
 
-            price = ASTR['targetPrice']['current']  #  Get price from analysis
-            position = positions2['position']
-            quote = wb.get_quote(TICKER)
-            askbidlist = quote['depth']
-            asks = askbidlist['ntvAggAskList']
-            bids = askbidlist['ntvAggBidList']
+            numOfASTR = getPositions(0)
 
-            min1 = 9999
-            for price in asks:
-                if float(price["price"]) < min1: # FIND MIN CURRENT ASK
-                    min1 = float(price["price"])
-                    ask = float(min1)
+            price = getPrice(TICKER)  #  Get price from analysis
 
-            max1 = 0
-            for price in bids:
-                if float(price["price"]) > max1: # FIND MAX CURRENT BID
-                    max1 = float(price["price"])
-                bid = float(max1)
+            ask = getAsk(TICKER)
 
-            if counter % UPDATE_INTERVAL == 1:
+            bid = getBid(TICKER)
+
+            if counter % UPDATE_INTERVAL == 0:
                 print("Bid: " + str(bid) + " Ask: " + str(ask))
 
-            if level == 2:
+            if ASTRLevel == 2:
                 print("triggered")
                 time.sleep(100)
 
-            if ask <= BUY_PRICE and level == 2:     # BUYING
+            if ask <= BUY_PRICE and ASTRLevel == 2:     # BUYING
                 print("Bought: " + ask)
-                wb.place_order(stock=TICKER, price=ask, action='BUY', orderType='LMT', enforce='GTC', quant=position+7)
-                level = level - 1
+                wb.place_order(stock=TICKER, price=ask, action='BUY', orderType='LMT', enforce='GTC', quant=numOfASTR+7)
+                ASTRLevel = ASTRLevel - 1
 
-            if bid >= SELL_PRICE and level == 1:    # SELLING
+            if bid >= SELL_PRICE and ASTRLevel == 1:    # SELLING
                 print("SOLD: " + bid)
-                wb.place_order(stock=TICKER, price=bid, action='SELL', orderType='LMT', enforce='GTC', quant=position/2)
-                level = level + 1
+                wb.place_order(stock=TICKER, price=bid, action='SELL', orderType='LMT', enforce='GTC', quant=numOfASTR/2)
+                ASTRLevel = ASTRLevel + 1
 
         else:
             #print(current_time)
