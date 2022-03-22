@@ -6,8 +6,8 @@ import config.userconfig as cfg
 wb = webull()
 # print(wb.get_mfa(cfg.wb_email))
 # print(wb.get_security(cfg.wb_email))
-BUY_PRICE = 4.375
-SELL_PRICE = 4.6
+BUY_PRICE = 4.35
+SELL_PRICE = 4.65
 UPDATE_INTERVAL = 30
 TICKER = 'ASTR'
 
@@ -47,7 +47,6 @@ while 0 < 1:
                     max1 = float(price["price"])
                 bid = float(max1)
 
-
             if counter % UPDATE_INTERVAL == 1:
                 print("Bid: " + str(bid) + " Ask: " + str(ask))
 
@@ -57,7 +56,7 @@ while 0 < 1:
 
             if ask <= BUY_PRICE and level == 2:     # BUYING
                 print("Bought: " + ask)
-                wb.place_order(stock=TICKER, price=ask, action='BUY', orderType='LMT', enforce='GTC', quant=position+10)
+                wb.place_order(stock=TICKER, price=ask, action='BUY', orderType='LMT', enforce='GTC', quant=position+7)
                 level = level - 1
 
             if bid >= SELL_PRICE and level == 1:    # SELLING
@@ -77,7 +76,8 @@ while 0 < 1:
         if counter > 400:
             print(wb.refresh_login()) # Login Refresh
             wb.get_trade_token(cfg.TRADE_TOKEN)
-            counter = 0 # RESET COUNTER
+            counter = 0  # RESET COUNTER
+
 
     except:
         while True:
