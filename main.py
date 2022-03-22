@@ -11,8 +11,9 @@ ASTR_SELL = 4.65
 UPDATE_INTERVAL = 3
 ASTR_symbol = 'ASTR'
 
-data = wb.login(cfg.wb_email, cfg.webull_pass, cfg.HOSTNAME, cfg.AUTH_CODE, '1001',
-                cfg.ANSWER)  # 6 digits MFA, Security Question ID, Question Answer.
+data = wb.login(cfg.wb_email, cfg.webull_pass, cfg.HOSTNAME, cfg.AUTH_CODE, '1001', cfg.ANSWER)
+                # 6 digits MFA, Security Question ID, Question Answer.
+
 wb.get_trade_token(cfg.TRADE_TOKEN)
 
 print(data)
@@ -33,7 +34,7 @@ def getAnalysis(ticker):
 
 
 def getAsk(ticker):
-    min1 = 99999
+    min1 = 999999
     asks = getBidsAsks(ticker, "ask")
     for price in asks:
         if float(price["price"]) < min1:  # FIND MIN CURRENT ASK
@@ -132,7 +133,8 @@ while 0 < 1:
                 print("Broken: Continuing")
                 wb.logout()
                 time.sleep(10)
-                print(wb.login(cfg.wb_email, cfg.webull_pass, cfg.HOSTNAME, cfg.AUTH_CODE, '1001', cfg.ANSWER))  # 6 digits MFA, Security Question ID, Question Answer.
+                print(wb.login(cfg.wb_email, cfg.webull_pass, cfg.HOSTNAME, cfg.AUTH_CODE, '1001', cfg.ANSWER))
+                # 6 digits MFA, Security Question ID, Question Answer.
                 time.sleep(1)
                 break
             except:
