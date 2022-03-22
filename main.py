@@ -7,8 +7,8 @@ wb = webull()
 # print(wb.get_mfa(cfg.wb_email))
 # print(wb.get_security(cfg.wb_email))
 ASTR_BUY = 4.2
-ASTR_SELL = 4.5
-ASTR_SELL2 = 4.7
+ASTR_SELLS = [4.5, 4.7]
+#ASTR_SELL2 = 4.7
 UPDATE_INTERVAL = 45
 ASTR_symbol = 'ASTR'
 
@@ -22,7 +22,13 @@ wb.get_trade_token(cfg.TRADE_TOKEN)
 print(data)
 
 counter = 0
-ASTRLevel = 1
+ASTRLevel = 0
+
+def getPriceWeight(setPrice, currentPrice):
+    difference = currentPrice/setPrice
+    percentage = 1 - difference
+    if percentage < 0:
+        percentage = -percentage
 
 
 def getPositions(ticker):
@@ -84,8 +90,12 @@ while 0 < 1:
         if current_time >= 7 and current_time <= 21:  # Is Market Open??
 
             numOfASTR = getPositions(ASTR_symbol)
-            if numOfASTR < 160:
+            if numOfASTR < 160 and numOfASTR > 70 and ASTRLevel != 1:
+                ASTRLevel = 1
+                print("Setting level to 1")
+            if numOfASTR <= 70 and ASTRLevel != 2:
                 ASTRLevel = 2
+                print("Setting level to 2")
             ASTRprice = getPrice(ASTR_symbol)  # Get price from analysis
 
             ASTRask = getAsk(ASTR_symbol)
@@ -93,40 +103,38 @@ while 0 < 1:
             ASTRbid = getBid(ASTR_symbol)
 
             ###   ASTR LOGIC
-
-            if ASTRLevel == 2 and numOfASTR > 161:
-                time.sleep(60)
-                if numOfASTR == 161:
-                    ###  Check if order placed was filled
+                    ### Checking If Order Filled Logic
+            if ASTRLevel == 1 and numOfASTR > 150: ### Check if Order is filled
+                time.sleep(60)    ### If not, allow time for order to be filled
+                if numOfASTR > 150:    ### If Order still not filled, cancel order and reset level.
                     print(wb.cancel_all_orders())
-                    ASTRLevel = 1
+                    ASTRLevel = 0
                     continue
 
 
             if counter % UPDATE_INTERVAL == 0:
                 print("Bid: " + str(ASTRbid) + " Ask: " + str(ASTRask))
-
-            if ASTRLevel == 2:
-                if counter % UPDATE_INTERVAL == 0:
-                    print("Level: "+str(ASTRLevel) + " Position: " +str(numOfASTR))
-                    print("Buy at: " + str(ASTR_BUY) + " Sell At: " + str(ASTR_SELL2))
-                ### BUYING ASTR
+                print("Level: " + str(ASTRLevel) + " Position: " + str(numOfASTR))
+                print("Buy at: " + str(ASTR_BUY) + " Sell At: " + str(ASTR_SELLS[ASTRLevel]))
 
 
-            if ASTRbid >= ASTR_SELL2 and ASTRLevel == 2:  # SELLING Level 2
-                SELL_DATA2 = placeOrder(ASTR_symbol, int(getPositions(ASTR_symbol)/2), ASTRbid-0.02, "SELL")
-                ASTRLevel = ASTRLevel + 1
 
+            ### BUYING ASTR
 
-            if ASTRask <= ASTR_BUY and ASTRLevel >= 2:  # BUYING
+            if ASTRask <= ASTR_BUY and ASTRLevel >= 1:  # BUYING
                 placeOrder(ASTR_symbol, int(getPositions(ASTR_symbol)+5), ASTRask+0.02, "BUY")
                 ASTRLevel = ASTRLevel - 1
 
-                ### SELLING ASTR
+            ### SELLING ASTR
 
-            if ASTRbid >= ASTR_SELL and ASTRLevel == 1:  # SELLING
+            if ASTRbid >= ASTR_SELLS[0] and ASTRLevel == 0:  # SELLING
                 SELL_DATA = placeOrder(ASTR_symbol, int(getPositions(ASTR_symbol)/2), ASTRbid-0.02, "SELL")
                 ASTRLevel = ASTRLevel + 1
+
+            if ASTRbid >= ASTR_SELLS[1] and ASTRLevel == 1:  # SELLING Level 2
+                SELL_DATA2 = placeOrder(ASTR_symbol, int(getPositions(ASTR_symbol)/2), ASTRbid-0.02, "SELL")
+                ASTRLevel = ASTRLevel + 1
+
 
 
         else:
