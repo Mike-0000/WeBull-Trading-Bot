@@ -7,12 +7,12 @@ wb = webull()
 # print(wb.get_mfa(cfg.wb_email))
 # print(wb.get_security(cfg.wb_email))
 
-DOGE_BUY = 0.1185
-DOGE_SELL = 0.124
+DOGE_BUY = 0.1172
+DOGE_SELL = 0.125
 ASTR_BUY = 4.15
 ASTR_SELLS = [4.5, 4.75]
 # ASTR_SELL2 = 4.7
-UPDATE_INTERVAL = 45
+UPDATE_INTERVAL = 60
 ASTR_symbol = 'ASTR'
 DOGE_SYMBOL = 'DOGEUSD'
 
@@ -107,43 +107,12 @@ def placeOrder(ticker, num, ask, mode):
 
 
 while 0 < 1:
-    try:
+    # try:
         now = datetime.now()
         current_time = now.hour
 
-        ###  Crypto Logic
-
-        numOfDOGE = getPositions(DOGE_SYMBOL)
-        DOGEbid = getCryptoBid(DOGE_SYMBOL)  ### DOGE
-        DOGEask = getCryptoAsk(DOGE_SYMBOL)
-
-        sell_doge = getPriceWeight(DOGE_SELL, DOGEbid)  ### DOGE
-        buy_doge = getPriceWeight(DOGE_BUY, DOGEask)
-
-        if counter % UPDATE_INTERVAL == 0:
-            print("Buy Percentage: " + str(buy_doge*100) + " Sell Percentage: " + str(sell_doge*100))
-            print("DOGE Bid: " + str(DOGEbid) + " Ask: " + str(DOGEask))
-            print("DOGE Position: " + str(numOfDOGE))
-            print("Buy at: " + str(DOGE_BUY) + " Sell At: " + str(DOGE_SELL))
-
-        if counter % 20 == 0:
-            wb.refresh_login()
-            time.sleep(1)
-
-        num = 1.1 / DOGEbid  # Calculate number of shares to equal 1.1 dollars
 
 
-        if sell_doge < 0.0075:
-            if numOfDOGE * DOGEbid < 1:
-                continue
-            placeCryptoOrder(DOGE_SYMBOL, int(num), DOGEbid, "SELL")
-            time.sleep(20000 * sell_doge)
-            continue
-
-        if buy_doge < 0.0075:
-            placeCryptoOrder(DOGE_SYMBOL, int(num), DOGEask, "BUY")
-            time.sleep(80000 * buy_doge)
-            continue
 
 
 
@@ -206,7 +175,7 @@ while 0 < 1:
 
         else:
             # print(current_time)
-            counter = counter + 1
+            #counter = counter + 1
             if counter % 100 == 0:
                 print(wb.refresh_login())
 
@@ -220,16 +189,56 @@ while 0 < 1:
             counter = 0  # RESET COUNTER
 
 
-    except:
-        while True:
-            try:
-                print("Broken: Continuing")
-                wb.logout()
-                time.sleep(10)
-                print(wb.login(cfg.wb_email, cfg.webull_pass, cfg.HOSTNAME, cfg.AUTH_CODE, '1001', cfg.ANSWER))
-                # 6 digits MFA, Security Question ID, Question Answer.
-                time.sleep(1)
-                break
-            except:
+
+
+        ###  Crypto Logic
+
+        numOfDOGE = getPositions(DOGE_SYMBOL)
+        DOGEbid = getCryptoBid(DOGE_SYMBOL)  ### DOGE
+        DOGEask = getCryptoAsk(DOGE_SYMBOL)
+
+        sell_doge = getPriceWeight(DOGE_SELL, DOGEbid)  ### DOGE
+        buy_doge = getPriceWeight(DOGE_BUY, DOGEask)
+
+        if counter % UPDATE_INTERVAL == 1:
+            print("Buy Percentage: " + str(buy_doge*100) + " Sell Percentage: " + str(sell_doge*100))
+            print("DOGE Bid: " + str(DOGEbid) + " Ask: " + str(DOGEask))
+            print("DOGE Position: " + str(numOfDOGE))
+            print("Buy at: " + str(DOGE_BUY) + " Sell At: " + str(DOGE_SELL))
+
+        if counter % 20 == 0:
+            wb.refresh_login()
+            time.sleep(1)
+
+        num = 1.1 / DOGEbid  # Calculate number of shares to equal 1.1 dollars
+
+
+        if sell_doge < 0.0085:
+            if numOfDOGE * DOGEbid < 1:
                 continue
-        continue
+            placeCryptoOrder(DOGE_SYMBOL, int(num), DOGEbid, "SELL")
+            time.sleep(20000 * sell_doge)
+            continue
+
+        if buy_doge < 0.0085:
+            placeCryptoOrder(DOGE_SYMBOL, int(num), DOGEask, "BUY")
+            time.sleep(80000 * buy_doge)
+            continue
+
+
+
+
+
+    # except:
+    #     while True:
+    #         try:
+    #             print("Broken: Continuing")
+    #             wb.logout()
+    #             time.sleep(10)
+    #             print(wb.login(cfg.wb_email, cfg.webull_pass, cfg.HOSTNAME, cfg.AUTH_CODE, '1001', cfg.ANSWER))
+    #             # 6 digits MFA, Security Question ID, Question Answer.
+    #             time.sleep(1)
+    #             break
+    #         except:
+    #             continue
+    #     continue
