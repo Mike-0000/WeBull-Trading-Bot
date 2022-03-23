@@ -10,11 +10,11 @@ wb = webull()
 DOGE_BUY = 0.105
 DOGE_SELL = 0.138
 
-ASTR_BUY = 4.32
-ASTR_SELLS = [4.5, 4.75]
+ASTR_BUY = 4.21
+ASTR_SELLS = [4.58, 4.83]
 
 
-UPDATE_INTERVAL = 240
+UPDATE_INTERVAL = 30
 
 DOGE_SYMBOL = 'DOGEUSD'
 ASTR_symbol = 'ASTR'
@@ -76,6 +76,9 @@ def getCryptoBid(ticker):
     bid = getCryptoBidsAsks(ticker, "bid")
     return float(bid)
 
+def getSettledCash():
+    cash = wb.get_account()['accountMembers'][2]['value']
+    return float(cash)
 
 def getBidsAsks(ticker, mode):
     quote = wb.get_quote(ticker)
@@ -89,6 +92,7 @@ def getBidsAsks(ticker, mode):
         return asks
 
 def getCryptoBidsAsks(ticker, mode):
+        quote = wb.get_quote(ticker)
         quote = wb.get_quote(ticker)
         asks = quote["askList"][0]['price']
         bids = quote["bidList"][0]['price']
@@ -115,12 +119,14 @@ while 0 < 1:
         now = datetime.now()
         current_time = now.hour
         #  US Stock Market
-
         if current_time >= 7 and current_time <= 19:  # Is Market Open??
 
             ### Collect position information
             numOfASTR = getPositions(ASTR_symbol)
-
+            if numOfASTR > 70 and ASTRLevel != 0:
+                ASTRLevel == 0
+            if numOfASTR <= 70 and ASTRLevel != 1:
+                ASTRLevel == 1
             # if numOfASTR >= 120 and ASTRLevel != 0:
             #     ASTRLevel = 0
             #     print("Setting level to 0")
@@ -143,24 +149,33 @@ while 0 < 1:
             #         print(wb.cancel_all_orders())
             #         ASTRLevel = 0
             #         continue
-
+            sell_astr = getPriceWeight(ASTR_SELLS[ASTRLevel], ASTRbid)  ### ASTR
+            buy_astr = getPriceWeight(ASTR_BUY, ASTRask)
             if counter % UPDATE_INTERVAL == 0:
+                print("ASTR Buy Percentage: " + str(buy_astr / 10) + " Sell Percentage: " + str(sell_astr / 10))
                 print("ASTR Bid: " + str(ASTRbid) + " Ask: " + str(ASTRask))
                 print("Level: " + str(ASTRLevel) + " Position: " + str(numOfASTR))
                 print("Buy at: " + str(ASTR_BUY) + " Sell At: " + str(ASTR_SELLS[ASTRLevel]))
 
-            sell_astr = getPriceWeight(ASTR_SELLS[ASTRLevel], ASTRbid)  ### ASTR
-            buy_astr = getPriceWeight(ASTR_BUY, ASTRask)
 
-            if sell_astr < 6:
+
+            if sell_astr < 5:
                 sell_astr = sell_astr*sell_astr
                 placeOrder(ASTR_symbol, 1, ASTRbid, "SELL")
-                time.sleep(sell_astr)
+                time.sleep(sell_astr*2)
+            elif ASTRbid > ASTR_SELLS[ASTRLevel]:
+                placeOrder(ASTR_symbol, 1, ASTRbid, "SELL")
+                time.sleep(sell_astr * 2)
 
-            if buy_astr < 6:
-                buy_astr = buy_astr*buy_astr
-                placeOrder(ASTR_symbol, 1, ASTRask, "BUY")
-                time.sleep(buy_astr)
+            if getSettledCash() > ASTRask:
+                if buy_astr < 5:
+                    buy_astr = buy_astr*buy_astr
+                    placeOrder(ASTR_symbol, 1, ASTRask, "BUY")
+                    time.sleep(buy_astr*2)
+                elif ASTRask < ASTR_BUY:
+                    placeOrder(ASTR_symbol, 1, ASTRask, "BUY")
+                    time.sleep(buy_astr * 2)
+
 
 
         ###  Misc Logic
@@ -173,41 +188,42 @@ while 0 < 1:
         #    counter = 0  # RESET COUNTER
 
 
-        ###  Crypto Logic
+        ###  Crypto Logic - DOGE
 
-        numOfDOGE = getPositions(DOGE_SYMBOL)
-        DOGEbid = getCryptoBid(DOGE_SYMBOL)  ### DOGE
-        DOGEask = getCryptoAsk(DOGE_SYMBOL)
-
-        sell_doge = getPriceWeight(DOGE_SELL, DOGEbid)  ### DOGE
-        buy_doge = getPriceWeight(DOGE_BUY, DOGEask)
-
-        if counter % UPDATE_INTERVAL * 120 == 120:
-            print("DOGE Buy Percentage: " + str(buy_doge/10) + " Sell Percentage: " + str(sell_doge/10))
-            print("DOGE Bid: " + str(DOGEbid) + " Ask: " + str(DOGEask))
-            print("DOGE Position: " + str(numOfDOGE))
-            print("DOGE Buy at: " + str(DOGE_BUY) + " Sell At: " + str(DOGE_SELL))
-
-        # if counter % 20 == 0:
-        #     wb.refresh_login()
-        #     time.sleep(1)
-
-        num = 1.1 / DOGEbid  # Calculate number of shares to equal 1.1 dollars
-
-
-        if sell_doge < 4.5:
-            sell_doge = sell_doge*sell_doge
-            if numOfDOGE * DOGEbid < 1:
-                continue
-            placeCryptoOrder(DOGE_SYMBOL, int(num), DOGEbid, "SELL")
-            time.sleep(8 * sell_doge)
-            continue
-
-        if buy_doge < 3:
-            buy_doge = buy_doge*buy_doge
-            placeCryptoOrder(DOGE_SYMBOL, int(num), DOGEask, "BUY")
-            time.sleep(18 * buy_doge)
-            continue
+        # numOfDOGE = getPositions(DOGE_SYMBOL)
+        # DOGEbid = getCryptoBid(DOGE_SYMBOL)  ### DOGE
+        # DOGEask = getCryptoAsk(DOGE_SYMBOL)
+        #
+        #
+        # sell_doge = getPriceWeight(DOGE_SELL, DOGEbid)  ### DOGE
+        # buy_doge = getPriceWeight(DOGE_BUY, DOGEask)
+        #
+        # if counter % UPDATE_INTERVAL * 12000 == 12000:
+        #     print("DOGE Buy Percentage: " + str(buy_doge/10) + " Sell Percentage: " + str(sell_doge/10))
+        #     print("DOGE Bid: " + str(DOGEbid) + " Ask: " + str(DOGEask))
+        #     print("DOGE Position: " + str(numOfDOGE))
+        #     print("DOGE Buy at: " + str(DOGE_BUY) + " Sell At: " + str(DOGE_SELL))
+        #
+        # # if counter % 20 == 0:
+        # #     wb.refresh_login()
+        # #     time.sleep(1)
+        #
+        # num = 1.1 / DOGEbid  # Calculate number of shares to equal 1.1 dollars
+        #
+        #
+        # if sell_doge < 4.5:
+        #     sell_doge = sell_doge*sell_doge
+        #     if numOfDOGE * DOGEbid < 1:
+        #         continue
+        #     placeCryptoOrder(DOGE_SYMBOL, int(num), DOGEbid, "SELL")
+        #     time.sleep(8 * sell_doge)
+        #     continue
+        #
+        # if buy_doge < 3:
+        #     buy_doge = buy_doge*buy_doge
+        #     placeCryptoOrder(DOGE_SYMBOL, int(num), DOGEask, "BUY")
+        #     time.sleep(18 * buy_doge)
+        #     continue
 
 
     except:
