@@ -114,8 +114,6 @@ while 0 < 1:
     try:
         now = datetime.now()
         current_time = now.hour
-
-
         #  US Stock Market
 
         if current_time >= 7 and current_time <= 19:  # Is Market Open??
@@ -123,15 +121,12 @@ while 0 < 1:
             ### Collect position information
             numOfASTR = getPositions(ASTR_symbol)
 
-            if numOfASTR >= 120 and ASTRLevel != 0:
-                ASTRLevel = 0
-                print("Setting level to 0")
-            if numOfASTR < 120 and numOfASTR > 40 and ASTRLevel != 1:
-                ASTRLevel = 1
-                print("Setting level to 1")
-            if numOfASTR <= 40 and ASTRLevel != 2:
-                ASTRLevel = 2
-                print("Setting level to 2")
+            # if numOfASTR >= 120 and ASTRLevel != 0:
+            #     ASTRLevel = 0
+            #     print("Setting level to 0")
+            # if numOfASTR < 120 and ASTRLevel != 1:
+            #     ASTRLevel = 1
+            #     print("Setting level to 1")
 
             # Get current price from analysis
 
@@ -142,12 +137,12 @@ while 0 < 1:
 
             ###   ASTR LOGIC
             ### Checking If Order Filled Logic
-            if ASTRLevel == 1 and numOfASTR > 150:  ### Check if Order is filled
-                time.sleep(60)  ### If not, allow time for order to be filled
-                if numOfASTR > 150:  ### If Order still not filled, cancel order and reset level.
-                    print(wb.cancel_all_orders())
-                    ASTRLevel = 0
-                    continue
+            # if ASTRLevel == 1 and numOfASTR > 150:  ### Check if Order is filled
+            #     time.sleep(60)  ### If not, allow time for order to be filled
+            #     if numOfASTR > 150:  ### If Order still not filled, cancel order and reset level.
+            #         print(wb.cancel_all_orders())
+            #         ASTRLevel = 0
+            #         continue
 
             if counter % UPDATE_INTERVAL == 0:
                 print("ASTR Bid: " + str(ASTRbid) + " Ask: " + str(ASTRask))
@@ -178,8 +173,6 @@ while 0 < 1:
         #    counter = 0  # RESET COUNTER
 
 
-
-
         ###  Crypto Logic
 
         numOfDOGE = getPositions(DOGE_SYMBOL)
@@ -190,7 +183,7 @@ while 0 < 1:
         buy_doge = getPriceWeight(DOGE_BUY, DOGEask)
 
         if counter % UPDATE_INTERVAL * 120 == 120:
-            print("DOGE Buy Percentage: " + str(buy_doge*100) + " Sell Percentage: " + str(sell_doge*100))
+            print("DOGE Buy Percentage: " + str(buy_doge/10) + " Sell Percentage: " + str(sell_doge/10))
             print("DOGE Bid: " + str(DOGEbid) + " Ask: " + str(DOGEask))
             print("DOGE Position: " + str(numOfDOGE))
             print("DOGE Buy at: " + str(DOGE_BUY) + " Sell At: " + str(DOGE_SELL))
@@ -207,13 +200,13 @@ while 0 < 1:
             if numOfDOGE * DOGEbid < 1:
                 continue
             placeCryptoOrder(DOGE_SYMBOL, int(num), DOGEbid, "SELL")
-            time.sleep(10 * sell_doge)
+            time.sleep(8 * sell_doge)
             continue
 
         if buy_doge < 3:
             buy_doge = buy_doge*buy_doge
             placeCryptoOrder(DOGE_SYMBOL, int(num), DOGEask, "BUY")
-            time.sleep(35 * buy_doge)
+            time.sleep(18 * buy_doge)
             continue
 
 
