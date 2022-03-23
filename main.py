@@ -7,14 +7,18 @@ wb = webull()
 # print(wb.get_mfa(cfg.wb_email))
 # print(wb.get_security(cfg.wb_email))
 
-DOGE_BUY = 0.1172
-DOGE_SELL = 0.125
-ASTR_BUY = 4.15
+DOGE_BUY = 0.105
+DOGE_SELL = 0.138
+
+ASTR_BUY = 4.32
 ASTR_SELLS = [4.5, 4.75]
-# ASTR_SELL2 = 4.7
-UPDATE_INTERVAL = 60
-ASTR_symbol = 'ASTR'
+
+
+UPDATE_INTERVAL = 240
+
 DOGE_SYMBOL = 'DOGEUSD'
+ASTR_symbol = 'ASTR'
+
 
 global SELL_DATA
 
@@ -32,7 +36,7 @@ def getPriceWeight(setPrice, currentPrice):
     percentage = 1 - difference
     if percentage < 0:
         percentage = -percentage
-    return percentage
+    return percentage*1000
 
 
 def getPositions(ticker):
@@ -107,15 +111,9 @@ def placeOrder(ticker, num, ask, mode):
 
 
 while 0 < 1:
-    # try:
+    try:
         now = datetime.now()
         current_time = now.hour
-
-
-
-
-
-
 
 
         #  US Stock Market
@@ -159,34 +157,25 @@ while 0 < 1:
             sell_astr = getPriceWeight(ASTR_SELLS[ASTRLevel], ASTRbid)  ### ASTR
             buy_astr = getPriceWeight(ASTR_BUY, ASTRask)
 
-            if sell_astr < 0.01:
+            if sell_astr < 6:
+                sell_astr = sell_astr*sell_astr
                 placeOrder(ASTR_symbol, 1, ASTRbid, "SELL")
-                time.sleep(1000 * sell_astr)  # print("SELL 1 @ " + str(ASTRbid))
+                time.sleep(sell_astr)
 
-            if buy_astr < 0.01:
+            if buy_astr < 6:
+                buy_astr = buy_astr*buy_astr
                 placeOrder(ASTR_symbol, 1, ASTRask, "BUY")
-                time.sleep(1000 * buy_astr)  # print("SELL 1 @ " + str(ASTRask))
+                time.sleep(buy_astr)
 
-            ### BUYING ASTR
-
-            # if ASTRask <= ASTR_BUY and ASTRLevel >= 1:  # BUYING  #     placeOrder(ASTR_symbol, int(getPositions(ASTR_symbol)+5), ASTRask+0.02, "BUY")  #     ASTRLevel = ASTRLevel - 1  #  # ### SELLING ASTR  #  # if ASTRbid >= ASTR_SELLS[0] and ASTRLevel == 0:  # SELLING  #     SELL_DATA = placeOrder(ASTR_symbol, int(getPositions(ASTR_symbol)/2), ASTRbid-0.02, "SELL")  #     ASTRLevel = ASTRLevel + 1  #  # if ASTRbid >= ASTR_SELLS[1] and ASTRLevel == 1:  # SELLING Level 2  #     SELL_DATA2 = placeOrder(ASTR_symbol, int(getPositions(ASTR_symbol)/2), ASTRbid-0.02, "SELL")  #     ASTRLevel = ASTRLevel + 1
-
-
-
-        else:
-            # print(current_time)
-            #counter = counter + 1
-            if counter % 100 == 0:
-                print(wb.refresh_login())
 
         ###  Misc Logic
 
         time.sleep(1)
         counter = counter + 1
-        if counter > 400:
+        if counter % 400 == 0:
             print(wb.refresh_login())  # Login Refresh
             wb.get_trade_token(cfg.TRADE_TOKEN)
-            counter = 0  # RESET COUNTER
+        #    counter = 0  # RESET COUNTER
 
 
 
@@ -200,45 +189,45 @@ while 0 < 1:
         sell_doge = getPriceWeight(DOGE_SELL, DOGEbid)  ### DOGE
         buy_doge = getPriceWeight(DOGE_BUY, DOGEask)
 
-        if counter % UPDATE_INTERVAL == 1:
-            print("Buy Percentage: " + str(buy_doge*100) + " Sell Percentage: " + str(sell_doge*100))
+        if counter % UPDATE_INTERVAL * 120 == 120:
+            print("DOGE Buy Percentage: " + str(buy_doge*100) + " Sell Percentage: " + str(sell_doge*100))
             print("DOGE Bid: " + str(DOGEbid) + " Ask: " + str(DOGEask))
             print("DOGE Position: " + str(numOfDOGE))
-            print("Buy at: " + str(DOGE_BUY) + " Sell At: " + str(DOGE_SELL))
+            print("DOGE Buy at: " + str(DOGE_BUY) + " Sell At: " + str(DOGE_SELL))
 
-        if counter % 20 == 0:
-            wb.refresh_login()
-            time.sleep(1)
+        # if counter % 20 == 0:
+        #     wb.refresh_login()
+        #     time.sleep(1)
 
         num = 1.1 / DOGEbid  # Calculate number of shares to equal 1.1 dollars
 
 
-        if sell_doge < 0.0085:
+        if sell_doge < 4.5:
+            sell_doge = sell_doge*sell_doge
             if numOfDOGE * DOGEbid < 1:
                 continue
             placeCryptoOrder(DOGE_SYMBOL, int(num), DOGEbid, "SELL")
-            time.sleep(20000 * sell_doge)
+            time.sleep(10 * sell_doge)
             continue
 
-        if buy_doge < 0.0085:
+        if buy_doge < 3:
+            buy_doge = buy_doge*buy_doge
             placeCryptoOrder(DOGE_SYMBOL, int(num), DOGEask, "BUY")
-            time.sleep(80000 * buy_doge)
+            time.sleep(35 * buy_doge)
             continue
 
 
-
-
-
-    # except:
-    #     while True:
-    #         try:
-    #             print("Broken: Continuing")
-    #             wb.logout()
-    #             time.sleep(10)
-    #             print(wb.login(cfg.wb_email, cfg.webull_pass, cfg.HOSTNAME, cfg.AUTH_CODE, '1001', cfg.ANSWER))
-    #             # 6 digits MFA, Security Question ID, Question Answer.
-    #             time.sleep(1)
-    #             break
-    #         except:
-    #             continue
-    #     continue
+    except:
+        while True:
+            try:
+                print("Broken: Continuing")
+                wb.logout()
+                time.sleep(2)
+                print(wb.login(cfg.wb_email, cfg.webull_pass, cfg.HOSTNAME, cfg.AUTH_CODE, '1001', cfg.ANSWER))
+                # 6 digits MFA, Security Question ID, Question Answer.
+                time.sleep(1)
+                counter = 0
+                break
+            except:
+                continue
+        continue
