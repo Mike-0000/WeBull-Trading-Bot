@@ -10,11 +10,11 @@ wb = webull()
 DOGE_BUY = 0.105
 DOGE_SELL = 0.138
 
-ASTR_BUY = 4.21
-ASTR_SELLS = [4.58, 4.83]
+ASTR_BUY = 4.06
+ASTR_SELLS = [4.43, 4.65]
 
 
-UPDATE_INTERVAL = 30
+UPDATE_INTERVAL = 240
 
 DOGE_SYMBOL = 'DOGEUSD'
 ASTR_symbol = 'ASTR'
@@ -114,7 +114,7 @@ def placeOrder(ticker, num, ask, mode):
     return d
 
 
-while 0 < 1:
+while True:
     try:
         now = datetime.now()
         current_time = now.hour
