@@ -2,7 +2,7 @@ from webull import webull  # for paper trading, import 'paper_webull'
 from datetime import datetime
 import time
 import config.userconfig as cfg
-
+import functions
 wb = webull()
 # print(wb.get_mfa(cfg.wb_email))
 # print(wb.get_security(cfg.wb_email))
@@ -11,14 +11,12 @@ DOGE_BUY = 0.105
 DOGE_SELL = 0.138
 
 ASTR_BUY = 4.06
-ASTR_SELLS = [4.43, 4.65]
-
+ASTR_SELLS = [4.36, 4.58]
 
 UPDATE_INTERVAL = 240
 
 DOGE_SYMBOL = 'DOGEUSD'
 ASTR_symbol = 'ASTR'
-
 
 global SELL_DATA
 
@@ -30,7 +28,6 @@ wb.get_trade_token(cfg.TRADE_TOKEN)
 counter = 0
 ASTRLevel = 0
 
-
 def getPriceWeight(setPrice, currentPrice):
     difference = currentPrice / setPrice
     percentage = 1 - difference
@@ -38,17 +35,14 @@ def getPriceWeight(setPrice, currentPrice):
         percentage = -percentage
     return percentage*1000
 
-
 def getPositions(ticker):
     positions1 = wb.get_positions()
     for symbols in positions1:
         if str(symbols['ticker']['symbol']) == ticker:
             return float(symbols['position'])
 
-
 def getAnalysis(ticker):
     return wb.get_analysis(ticker)
-
 
 def getAsk(ticker):
     min1 = 999999
@@ -57,7 +51,6 @@ def getAsk(ticker):
         if float(price["price"]) < min1:  # FIND MIN CURRENT ASK
             min1 = float(price["price"])
     return float(min1)
-
 
 def getBid(ticker):
     max1 = 0
@@ -70,7 +63,6 @@ def getBid(ticker):
 def getCryptoAsk(ticker):
     ask = getCryptoBidsAsks(ticker, "ask")
     return float(ask)
-
 
 def getCryptoBid(ticker):
     bid = getCryptoBidsAsks(ticker, "bid")
@@ -93,7 +85,6 @@ def getBidsAsks(ticker, mode):
 
 def getCryptoBidsAsks(ticker, mode):
         quote = wb.get_quote(ticker)
-        quote = wb.get_quote(ticker)
         asks = quote["askList"][0]['price']
         bids = quote["bidList"][0]['price']
         if mode == 'bid':
@@ -107,12 +98,10 @@ def placeCryptoOrder(ticker, num, ask, mode):
     print(d)
     return d
 
-
 def placeOrder(ticker, num, ask, mode):
     d = wb.place_order(stock=ticker, price=ask, action=mode, orderType='LMT', enforce='GTC', quant=num)
     print(mode + ": " + str(num) + " for $" + str(ask))
     return d
-
 
 while True:
     try:
@@ -157,33 +146,29 @@ while True:
                 print("Level: " + str(ASTRLevel) + " Position: " + str(numOfASTR))
                 print("Buy at: " + str(ASTR_BUY) + " Sell At: " + str(ASTR_SELLS[ASTRLevel]))
 
-
-
             if sell_astr < 5:
                 sell_astr = sell_astr*sell_astr
-                placeOrder(ASTR_symbol, 1, ASTRbid, "SELL")
-                time.sleep(sell_astr*2)
-            elif ASTRbid > ASTR_SELLS[ASTRLevel]:
-                placeOrder(ASTR_symbol, 1, ASTRbid, "SELL")
-                time.sleep(sell_astr * 2)
+                placeOrder(ASTR_symbol, 4, ASTRbid, "SELL")
+                time.sleep(sell_astr*8)
+            elif ASTRbid > ASTR_SELLS[ASTRLevel]: ### Check if Bid exceeds Sell Price
+                placeOrder(ASTR_symbol, 4, ASTRbid, "SELL")
+                time.sleep(sell_astr * 16)
 
             if getSettledCash() > ASTRask:
-                if buy_astr < 5:
+                if buy_astr < 8:
                     buy_astr = buy_astr*buy_astr
                     placeOrder(ASTR_symbol, 1, ASTRask, "BUY")
                     time.sleep(buy_astr*2)
                 elif ASTRask < ASTR_BUY:
                     placeOrder(ASTR_symbol, 1, ASTRask, "BUY")
-                    time.sleep(buy_astr * 2)
-
-
+                    time.sleep(buy_astr * 4)
 
         ###  Misc Logic
 
         time.sleep(1)
         counter = counter + 1
         if counter % 400 == 0:
-            print(wb.refresh_login())  # Login Refresh
+            wb.refresh_login()  # Login Refresh
             wb.get_trade_token(cfg.TRADE_TOKEN)
         #    counter = 0  # RESET COUNTER
 
@@ -225,14 +210,13 @@ while True:
         #     time.sleep(18 * buy_doge)
         #     continue
 
-
     except:
         while True:
             try:
                 print("Broken: Continuing")
                 wb.logout()
                 time.sleep(2)
-                print(wb.login(cfg.wb_email, cfg.webull_pass, cfg.HOSTNAME, cfg.AUTH_CODE, '1001', cfg.ANSWER))
+                wb.login(cfg.wb_email, cfg.webull_pass, cfg.HOSTNAME, cfg.AUTH_CODE, '1001', cfg.ANSWER)
                 # 6 digits MFA, Security Question ID, Question Answer.
                 time.sleep(1)
                 counter = 0
