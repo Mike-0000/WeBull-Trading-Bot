@@ -13,7 +13,7 @@ DOGE_SELL = 0.138
 ASTR_BUY = 4.04
 ASTR_SELLS = [4.39, 4.59]
 
-UPDATE_INTERVAL = 240
+UPDATE_INTERVAL = 2
 
 DOGE_SYMBOL = 'DOGEUSD'
 ASTR_symbol = 'ASTR'
@@ -109,13 +109,14 @@ while True:
         current_time = now.hour
         #  US Stock Market
         if current_time >= 7 and current_time <= 19:  # Is Market Open??
-
-            ### Collect position information
             numOfASTR = getPositions(ASTR_symbol)
-            if numOfASTR > 100 and ASTRLevel != 0:
-                ASTRLevel == 0
-            if numOfASTR <= 100 and ASTRLevel != 1:
-                ASTRLevel == 1
+            if numOfASTR == None:
+                ASTRLevel = 1
+            ### Collect position information
+            elif numOfASTR > 100 and ASTRLevel != 0:
+                ASTRLevel = 0
+            elif numOfASTR <= 100 and ASTRLevel != 1:
+                ASTRLevel = 1
             # if numOfASTR >= 120 and ASTRLevel != 0:
             #     ASTRLevel = 0
             #     print("Setting level to 0")
