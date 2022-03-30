@@ -10,8 +10,8 @@ wb = webull()
 DOGE_BUY = 0.105
 DOGE_SELL = 0.138
 
-ASTR_BUY = 4.06
-ASTR_SELLS = [4.36, 4.58]
+ASTR_BUY = 4.04
+ASTR_SELLS = [4.39, 4.59]
 
 UPDATE_INTERVAL = 240
 
@@ -112,9 +112,9 @@ while True:
 
             ### Collect position information
             numOfASTR = getPositions(ASTR_symbol)
-            if numOfASTR > 70 and ASTRLevel != 0:
+            if numOfASTR > 100 and ASTRLevel != 0:
                 ASTRLevel == 0
-            if numOfASTR <= 70 and ASTRLevel != 1:
+            if numOfASTR <= 100 and ASTRLevel != 1:
                 ASTRLevel == 1
             # if numOfASTR >= 120 and ASTRLevel != 0:
             #     ASTRLevel = 0
