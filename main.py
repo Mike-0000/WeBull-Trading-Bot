@@ -11,9 +11,10 @@ DOGE_BUY = 0.105
 DOGE_SELL = 0.138
 
 ASTR_BUY = 4.04
-ASTR_SELLS = [4.39, 4.59]
+ASTR_SELLS = [4.48, 4.66]
 
-UPDATE_INTERVAL = 2
+SELL_INTERVAL = 12
+UPDATE_INTERVAL = 240
 
 DOGE_SYMBOL = 'DOGEUSD'
 ASTR_symbol = 'ASTR'
@@ -150,7 +151,7 @@ while True:
             if sell_astr < 5:
                 sell_astr = sell_astr*sell_astr
                 placeOrder(ASTR_symbol, 4, ASTRbid, "SELL")
-                time.sleep(sell_astr*8)
+                time.sleep(sell_astr*SELL_INTERVAL)
             elif ASTRbid > ASTR_SELLS[ASTRLevel]: ### Check if Bid exceeds Sell Price
                 placeOrder(ASTR_symbol, 4, ASTRbid, "SELL")
                 time.sleep(sell_astr * 16)
