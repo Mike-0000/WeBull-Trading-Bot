@@ -10,10 +10,10 @@ wb = webull()
 DOGE_BUY = 0.105
 DOGE_SELL = 0.138
 
-ASTR_BUY = 4.04
-ASTR_SELLS = [4.48, 4.66]
+ASTR_BUY = 3.365
+ASTR_SELLS = [3.66, 3.82, 4.00, 4.10]
 
-SELL_INTERVAL = 12
+SELL_INTERVAL = 45
 UPDATE_INTERVAL = 240
 
 DOGE_SYMBOL = 'DOGEUSD'
@@ -112,12 +112,19 @@ while True:
         if current_time >= 7 and current_time <= 19:  # Is Market Open??
             numOfASTR = getPositions(ASTR_symbol)
             if numOfASTR == None:
-                ASTRLevel = 1
-            ### Collect position information
-            elif numOfASTR > 100 and ASTRLevel != 0:
+                ASTRLevel = 100
+            elif numOfASTR > 150 and ASTRLevel != 0:
                 ASTRLevel = 0
-            elif numOfASTR <= 100 and ASTRLevel != 1:
+            elif numOfASTR <= 150 and numOfASTR > 100 and ASTRLevel != 1:
                 ASTRLevel = 1
+            elif numOfASTR <= 100 and numOfASTR > 50 and ASTRLevel != 2:
+                ASTRLevel = 2
+            elif numOfASTR <= 50 and numOfASTR > 0 and ASTRLevel != 3:
+                ASTRLevel = 3
+
+
+
+
             # if numOfASTR >= 120 and ASTRLevel != 0:
             #     ASTRLevel = 0
             #     print("Setting level to 0")
