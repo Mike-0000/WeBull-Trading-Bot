@@ -7,11 +7,14 @@ wb = webull()
 # print(wb.get_mfa(cfg.wb_email))
 # print(wb.get_security(cfg.wb_email))
 
+BUY_BELLCURVE = 9 # Size of the Buy Bell Curve at 1/10 of 1%. (Radius, not diameter)
+SELL_BELLCURVE = 6 # Size of the Sell Bell Curve at 1/10 of 1%. (Radius, not diameter)
+
 DOGE_BUY = 0.105
 DOGE_SELL = 0.138
 
-ASTR_BUY = 3.365
-ASTR_SELLS = [3.66, 3.82, 4.00, 4.10]
+ASTR_BUY = 3.135
+ASTR_SELLS = [3.48, 3.58, 3.68, 3.80]
 
 SELL_INTERVAL = 45
 UPDATE_INTERVAL = 240
@@ -150,12 +153,12 @@ while True:
             sell_astr = getPriceWeight(ASTR_SELLS[ASTRLevel], ASTRbid)  ### ASTR
             buy_astr = getPriceWeight(ASTR_BUY, ASTRask)
             if counter % UPDATE_INTERVAL == 0:
-                print("ASTR Buy Percentage: " + str(buy_astr / 10) + " Sell Percentage: " + str(sell_astr / 10))
+                print("ASTR Buy Distance %: " + str(buy_astr / 10) + " Sell Distance %: " + str(sell_astr / 10))
                 print("ASTR Bid: " + str(ASTRbid) + " Ask: " + str(ASTRask))
                 print("Level: " + str(ASTRLevel) + " Position: " + str(numOfASTR))
                 print("Buy at: " + str(ASTR_BUY) + " Sell At: " + str(ASTR_SELLS[ASTRLevel]))
 
-            if sell_astr < 5:
+            if sell_astr < SELL_BELLCURVE:
                 sell_astr = sell_astr*sell_astr
                 placeOrder(ASTR_symbol, 4, ASTRbid, "SELL")
                 time.sleep(sell_astr*SELL_INTERVAL)
@@ -164,7 +167,7 @@ while True:
                 time.sleep(sell_astr * 16)
 
             if getSettledCash() > ASTRask:
-                if buy_astr < 8:
+                if buy_astr < BUY_BELLCURVE:
                     buy_astr = buy_astr*buy_astr
                     placeOrder(ASTR_symbol, 1, ASTRask, "BUY")
                     time.sleep(buy_astr*2)
