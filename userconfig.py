@@ -1,0 +1,6 @@
+wb_email = ''
+webull_pass = ''
+TRADE_TOKEN = ''
+ANSWER = ''
+AUTH_CODE = ''
+HOSTNAME = ''
