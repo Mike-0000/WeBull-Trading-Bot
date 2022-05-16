@@ -2,7 +2,6 @@ from webull import webull  # for paper trading, import 'paper_webull'
 from datetime import datetime
 import time
 import config.userconfig as cfg
-import functions
 wb = webull()
 # print(wb.get_mfa(cfg.wb_email))
 # print(wb.get_security(cfg.wb_email))
@@ -13,10 +12,13 @@ SELL_BELLCURVE = 6 # Size of the Sell Bell Curve at 1/10 of 1%. (Radius, not dia
 DOGE_BUY = 0.105
 DOGE_SELL = 0.138
 
-ASTR_BUY = 3.135
-ASTR_SELLS = [3.48, 3.58, 3.68, 3.80]
+#ASTR_BUY = 2.215
+ASTR_SELLS = [0,0,0,0]
 
-SELL_INTERVAL = 45
+BUY_PRICE_DISTANCE = 0.06     ### In Percent - Starting Buy price based on previous closing price
+SELL_PRICE_INTERVAL = 0.04    ### In Percent - Starting Sell Prices based on previous closing price
+
+SELL_INTERVAL = 30
 UPDATE_INTERVAL = 240
 
 DOGE_SYMBOL = 'DOGEUSD'
@@ -72,6 +74,12 @@ def getCryptoBid(ticker):
     bid = getCryptoBidsAsks(ticker, "bid")
     return float(bid)
 
+def getPrevClose(ticker):
+    o = wb.get_quote(ticker)
+    o = o["preClose"]
+    return float(o)
+
+
 def getSettledCash():
     cash = wb.get_account()['accountMembers'][2]['value']
     return float(cash)
@@ -102,9 +110,10 @@ def placeCryptoOrder(ticker, num, ask, mode):
     print(d)
     return d
 
-def placeOrder(ticker, num, ask, mode):
+def placeOrder(ticker, num, ask, mode, prevClose):
     d = wb.place_order(stock=ticker, price=ask, action=mode, orderType='LMT', enforce='GTC', quant=num)
     print(mode + ": " + str(num) + " for $" + str(ask))
+    print("PrevClose: "+prevClose)
     return d
 
 while True:
@@ -112,7 +121,13 @@ while True:
         now = datetime.now()
         current_time = now.hour
         #  US Stock Market
-        if current_time >= 7 and current_time <= 19:  # Is Market Open??
+        if current_time >= 9 and current_time <= 16:  # Is Market Open??
+            PREV_CLOSE = getPrevClose(ASTR_symbol)
+            ASTR_BUY = PREV_CLOSE - (PREV_CLOSE * BUY_PRICE_DISTANCE)  # Set Buy price to 6% below prevClose price
+            count = 0
+            while count < 4:
+                ASTR_SELLS[count] = PREV_CLOSE + (PREV_CLOSE * SELL_PRICE_INTERVAL * (count + 1))
+                count = count + 1
             numOfASTR = getPositions(ASTR_symbol)
             if numOfASTR == None:
                 ASTRLevel = 100
@@ -160,10 +175,10 @@ while True:
 
             if sell_astr < SELL_BELLCURVE:
                 sell_astr = sell_astr*sell_astr
-                placeOrder(ASTR_symbol, 4, ASTRbid, "SELL")
+                placeOrder(ASTR_symbol, 4, ASTRbid, "SELL", PREV_CLOSE)
                 time.sleep(sell_astr*SELL_INTERVAL)
             elif ASTRbid > ASTR_SELLS[ASTRLevel]: ### Check if Bid exceeds Sell Price
-                placeOrder(ASTR_symbol, 4, ASTRbid, "SELL")
+                placeOrder(ASTR_symbol, 4, ASTRbid, "SELL", PREV_CLOSE)
                 time.sleep(sell_astr * 16)
 
             if getSettledCash() > ASTRask:
