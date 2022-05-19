@@ -6,7 +6,7 @@ wb = webull()
 # print(wb.get_mfa(cfg.wb_email))
 # print(wb.get_security(cfg.wb_email))
 
-BUY_BELLCURVE = 9 # Size of the Buy Bell Curve at 1/10 of 1%. (Radius, not diameter)
+BUY_BELLCURVE = 8 # Size of the Buy Bell Curve at 1/10 of 1%. (Radius, not diameter)
 SELL_BELLCURVE = 6 # Size of the Sell Bell Curve at 1/10 of 1%. (Radius, not diameter)
 
 DOGE_BUY = 0.105
@@ -15,8 +15,8 @@ DOGE_SELL = 0.138
 #ASTR_BUY = 2.215
 ASTR_SELLS = [0,0,0,0]
 
-BUY_PRICE_DISTANCE = 0.06     ### In Percent - Starting Buy price based on previous closing price
-SELL_PRICE_INTERVAL = 0.04    ### In Percent - Starting Sell Prices based on previous closing price
+BUY_PRICE_DISTANCE = 0.04      ### In Percent - Starting Buy price based on previous closing price
+SELL_PRICE_INTERVAL = 0.033    ### In Percent - Starting Sell Prices based on previous closing price
 
 SELL_INTERVAL = 30
 UPDATE_INTERVAL = 240
